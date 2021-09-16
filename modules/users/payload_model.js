@@ -6,6 +6,12 @@ const registerValidate = joi.object({
   password: joi.string().required().min(5)
 });
 
+const loginValidate = joi.object({
+  email: joi.string().required(),
+  password: joi.string().required()
+});
+
 module.exports = {
-  registerValidate
+  registerValidate,
+  loginValidate
 };

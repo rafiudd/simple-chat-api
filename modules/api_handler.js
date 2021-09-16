@@ -28,6 +28,31 @@ const registerUser = async (req, res) => {
   sendResponse(await postRequest(validatePayload));
 }
 
+const loginUser = async (req, res) => {
+  const { body } = req;
+
+  const payload = {
+    ...body
+  };
+
+  const validatePayload = validator.isValidPayload(payload, payloadModel.loginValidate);
+
+  const postRequest = async (result) => {
+    if(result.err) {
+      return result;
+    }
+
+    return userDomain.loginUser(result.data);
+  };
+
+  const sendResponse = async (result) => {
+    (result.err) ? wrapper.response(res, 'fail', result)
+      : wrapper.response(res, 'success', result, result.message);
+  };
+  sendResponse(await postRequest(validatePayload));
+}
+
 module.exports = {
-  registerUser
+  registerUser,
+  loginUser
 };
