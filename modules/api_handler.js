@@ -1,24 +1,33 @@
 const wrapper = require('../helpers/utils/wrapper');
+const validator = require('../helpers/utils/validator');
 const userDomain = require('./users/domain');
+const payloadModel = require('./users/payload_model');
 
 /*eslint no-arrow-condition: "error"*/
 const registerUser = async (req, res) => {
-  const { user, headers, query } = req;
-  const payload =
-    {
-      ...user,
-      ...headers,
-      url : req.href(),
-      query
-    };
-  const getData = async () => userDomain.registerUser(payload);
-  const sendResponse = async (result, data) => {
-    (result.err) ? wrapper.paginationResponse(res, 'fail', result)
-      : wrapper.paginationResponse(res, 'success', result, result.message, data);
+  const { body } = req;
+
+  const payload = {
+    ...body
   };
-  sendResponse(await getData());
-};
-  
+
+  const validatePayload = validator.isValidPayload(payload, payloadModel.registerValidate);
+
+  const postRequest = async (result) => {
+    if(result.err) {
+      return result;
+    }
+
+    return userDomain.registerUser(result.data);
+  };
+
+  const sendResponse = async (result) => {
+    (result.err) ? wrapper.response(res, 'fail', result)
+      : wrapper.response(res, 'success', result, result.message);
+  };
+  sendResponse(await postRequest(validatePayload));
+}
+
 module.exports = {
   registerUser
-}
+};
