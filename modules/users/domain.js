@@ -1,14 +1,9 @@
 const bcrypt = require('bcryptjs');
 const conn = require('../../helpers/database/connection').promise();
 const wrapper = require('../../helpers/utils/wrapper');
-const {validationResult} = require('express-validator');
+const jwt = require('jsonwebtoken');
 
 const registerUser = async (req) => {
-  const errors = validationResult(req);
-
-  if(!errors.isEmpty()){
-    return res.status(422).json({ errors: errors.array() });
-  }
   const [row] = await conn.execute(
     "SELECT `email` FROM `users` WHERE `email`=?",
     [req.email]
@@ -36,10 +31,35 @@ const registerUser = async (req) => {
       createdAt: date,
       updatedAt: date
     }
-    return wrapper.data(resModel, 'Success Register Users', 200);
+    return wrapper.data(resModel, 'Success Register User', 200);
   }
+};
+
+const loginUser = async (req) => {
+  const [row] = await conn.execute(
+    "SELECT * FROM `users` WHERE `email`=?",
+    [req.email]
+  );
+
+  if (row.length === 0) {
+    return wrapper.data({}, 'Email Not Found', 201);
+  }
+
+  const passMatch = await bcrypt.compare(req.password, row[0].password);
+  if(!passMatch){
+    return wrapper.error({}, 'Incorrect Password', 401);
+  }
+
+  const generateToken = jwt.sign({id:row[0].id},'the-super-strong-secrect',{ expiresIn: '1h' });
+  const resModel = {
+    email: req.email,
+    token: generateToken
+  };
+
+  return wrapper.data(resModel, 'Success Login User', 200);
 };
   
 module.exports = {
-  registerUser
+  registerUser,
+  loginUser
 }

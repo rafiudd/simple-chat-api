@@ -9,5 +9,6 @@ router.get('/', function (req, res) {
 });
 
 router.post('/users/register', apiHandlers.registerUser);
+router.post('/users/login', apiHandlers.loginUser);
 
 module.exports = router;
