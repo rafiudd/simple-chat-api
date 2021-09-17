@@ -16,7 +16,7 @@ const registerUser = async (req) => {
 
   const hashPass = await bcrypt.hash(req.password, 12);
   const date = new Date().toISOString();
-  const [rows] = await conn.execute('INSERT INTO `users`(`username`, `email`, `password`, `createdAt`, `updatedAt`) VALUES(?,?,?,?,?)', [
+  const [rows] = await conn.execute('INSERT INTO `users`(`username`, `email`, `password`, `created_at`, `updated_at`) VALUES(?,?,?,?,?)', [
     req.username,
     req.email,
     hashPass,
