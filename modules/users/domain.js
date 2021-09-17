@@ -46,7 +46,7 @@ const loginUser = async (req) => {
   }
 
   const passMatch = await bcrypt.compare(req.password, row[0].password);
-  if(!passMatch){
+  if (!passMatch) {
     return wrapper.error({}, 'Incorrect Password', 401);
   }
 
