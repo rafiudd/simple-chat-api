@@ -128,10 +128,30 @@ const replyChat = async (req, res) => {
   sendResponse(await postRequest(validatePayload));
 };
 
+const getDetailChat = async (req, res) => {
+  const { params, headers, query } = req;
+  const users = common.getDataFromToken(req, res, headers.authorization);
+
+  const payload = {
+    ...params,
+    ...headers,
+    ...query,
+    users
+  };
+
+  const getData = async () => chatDomain.getDetailChat(payload);
+  const sendResponse = async (result, data) => {
+    (result.err) ? wrapper.paginationResponse(res, 'fail', result)
+      : wrapper.paginationResponse(res, 'success', result, result.message, data);
+  };
+  sendResponse(await getData());
+};
+
 module.exports = {
   registerUser,
   loginUser,
   createChat,
   getAllChat,
-  replyChat
+  replyChat,
+  getDetailChat
 };

@@ -63,7 +63,7 @@ const getAllChat = async (req) => {
   const { users } = req;
   const resData = [];
   const [rows] = await conn.execute(
-    'SELECT rooms.user_id_receiver, rooms.created_by, rooms.room_id, rooms.created_at, rooms.updated_at, users.username FROM rooms INNER JOIN users ON rooms.user_id_receiver = users.id WHERE rooms.created_by = ? ORDER BY rooms.updated_at',
+    'SELECT rooms.user_id_receiver, rooms.created_by, rooms.room_id, rooms.created_at, rooms.updated_at, users.username FROM rooms INNER JOIN users ON rooms.user_id_receiver = users.id WHERE rooms.created_by = ? ORDER BY rooms.updated_at DESC',
     [users.id]
   );
 
@@ -74,7 +74,7 @@ const getAllChat = async (req) => {
   await Promise.all(
     rows.map(async (value) => {
       const [getLastMessage] = await conn.execute(
-        'SELECT message FROM messages WHERE room_id = ? ORDER BY message',
+        'SELECT message FROM messages WHERE room_id = ? ORDER BY created_at DESC',
         [value.room_id]
       );
       const resModel = {
@@ -138,8 +138,34 @@ const replyChat = async (req) => {
   }
 };
 
+const getDetailChat = async (req) => {
+  const { roomId } = req;
+  const resData = [];
+  let [rows] = await conn.execute(
+    'SELECT * FROM messages WHERE room_id = ? ORDER BY created_at DESC',
+    [roomId]
+  )
+
+  if (rows.length < 1) {
+    return wrapper.data({}, 'Chat Not Found', 201);
+  }
+
+  rows.map((value) => {
+    const resModel = {
+      roomId: value.room_id,
+      message: value.message,
+      messageId: value.message_id,
+      createdBy: value.created_by,
+      createdAt: value.created_at
+    }
+    resData.push(resModel)
+  })
+  return wrapper.data(resData, 'Success Get Detail Chat', 200);
+};
+
 module.exports = {
   createChat,
   getAllChat,
-  replyChat
+  replyChat,
+  getDetailChat
 };
