@@ -13,7 +13,8 @@ const createChat = async (req) => {
     'SELECT * FROM `rooms` WHERE `created_by` = ? AND `user_id_receiver` = ?',
     [users.id, userIdReceiver]
   );
-
+  
+  // jika pengirim sudah pernah mengirim pesan ke penerima
   if (validateRooms.length > 0) {
     return wrapper.error(true, 'Cannot create new chat, You already in room. Please use API Reply Chat', 500);
   }
@@ -59,10 +60,10 @@ const createChat = async (req) => {
 };
 
 const getAllChat = async (req) => {
-  const { users, page, size } = req;
+  const { users } = req;
   const resData = [];
   const [rows] = await conn.execute(
-    'SELECT * FROM `rooms` WHERE `created_by`=? ORDER BY created_at = ASC',
+    'SELECT rooms.user_id_receiver, rooms.created_by, rooms.room_id, rooms.created_at, rooms.updated_at, users.username FROM rooms INNER JOIN users ON rooms.user_id_receiver = users.id WHERE rooms.created_by = ? ORDER BY rooms.updated_at',
     [users.id]
   );
 
@@ -70,28 +71,25 @@ const getAllChat = async (req) => {
     return wrapper.data({}, 'Chat Not Found', 201);
   }
 
-  let getLastMessage = rows[0].message;
-  let getLastUpdate = rows[0].created_at;
+  await Promise.all(
+    rows.map(async (value) => {
+      const [getLastMessage] = await conn.execute(
+        'SELECT message FROM messages WHERE room_id = ? ORDER BY message',
+        [value.room_id]
+      );
+      const resModel = {
+        roomId: value.room_id,
+        userIdReceiver: value.user_id_receiver,
+        userNameReceiver: value.username,
+        createdBy: value.created_by,
+        lastMessage: getLastMessage[0] ? getLastMessage[0].message : "",
+        lastUpdate: value.updated_at
+      };
+      resData.push(resModel);
+    })
+  );
 
-  rows.map((value) => {
-    const resModel = {
-      roomId: value.room_id,
-      userIdReceiver: value.user_id_receiver,
-      createdBy: value.created_by,
-      lastMessage: getLastMessage,
-      lastUpdate: getLastUpdate
-    };
-    resData.push(resModel);
-  });
-
-  const metaData = {
-    page: 1,
-    size: 1,
-    totalPages: 1,
-    totalData: 1
-  };
-
-  return wrapper.paginationData(resData, metaData, 'Success Get All Chat', 200);
+  return wrapper.data(resData, 'Success Get All Chat', 200);
 };
 
 const replyChat = async (req) => {
