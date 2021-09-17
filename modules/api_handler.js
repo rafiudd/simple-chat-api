@@ -100,7 +100,6 @@ const getAllChat = async (req, res) => {
   sendResponse(await getData());
 };
 
-
 const replyChat = async (req, res) => {
   const { body, headers } = req;
   const users = common.getDataFromToken(req, res, headers.authorization);
@@ -147,11 +146,31 @@ const getDetailChat = async (req, res) => {
   sendResponse(await getData());
 };
 
+
+const getAllUser = async (req, res) => {
+  const { query, headers } = req;
+  const users = common.getDataFromToken(req, res, headers.authorization);
+
+  const payload = {
+    ...query,
+    ...headers,
+    users
+  };
+
+  const getData = async () => userDomain.getAllUser(payload);
+  const sendResponse = async (result, data) => {
+    (result.err) ? wrapper.paginationResponse(res, 'fail', result)
+      : wrapper.paginationResponse(res, 'success', result, result.message, data);
+  };
+  sendResponse(await getData());
+};
+
 module.exports = {
   registerUser,
   loginUser,
   createChat,
   getAllChat,
   replyChat,
-  getDetailChat
+  getDetailChat,
+  getAllUser
 };
