@@ -10,6 +10,7 @@ router.get('/', function (req, res) {
 
 router.post('/users/register', apiHandlers.registerUser);
 router.post('/users/login', apiHandlers.loginUser);
+router.get('/users/all', apiHandlers.getAllUser);
 
 router.post('/chats/new', apiHandlers.createChat);
 router.get('/chats/me', apiHandlers.getAllChat);
