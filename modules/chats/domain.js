@@ -19,11 +19,12 @@ const createChat = async (req) => {
   }
 
   const [createRooms] = await conn.execute(
-    'INSERT INTO `rooms` (`room_id`, `user_id_receiver`, `created_by`, `created_at`) VALUES(?,?,?,?)', 
+    'INSERT INTO `rooms` (`room_id`, `user_id_receiver`, `created_by`, `created_at`, `updated_at`) VALUES(?,?,?,?,?)', 
     [
       roomId,
       userIdReceiver,
       users.id,
+      date,
       date
     ]
   );
