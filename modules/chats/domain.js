@@ -115,12 +115,12 @@ const replyChat = async (req) => {
   const date = new Date().toISOString();
   
   const [validateRooms] = await conn.execute(
-    'SELECT * FROM `rooms` WHERE `room_id` = ? AND (user_id_receiver = ? OR created_by = ?)',
-    [roomId, users.id, users.id]
+    'SELECT * FROM `rooms` WHERE `room_id` = ?',
+    [roomId]
   );
 
   if (validateRooms.length < 1) {
-    return wrapper.error(true, 'Cannot reply chat, Not allowed to access this Room Id', 500);
+    return wrapper.data({}, 'Rooms Not Found', 201);
   }
 
   const [createMessage] = await conn.execute(
