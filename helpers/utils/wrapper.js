@@ -36,7 +36,7 @@ const response = (res, type, result, message, code, link) => {
     resultObject.link = link;
   }
 
-  res.status(result.code).body(resultObject);
+  res.status(result.code).send(resultObject);
 };
 
 const paginationResponse = (res, type, result, message = null, code = null) => {
