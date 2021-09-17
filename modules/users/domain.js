@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const conn = require('../../helpers/database/connection').promise();
 const wrapper = require('../../helpers/utils/wrapper');
 const jwt = require('jsonwebtoken');
+const config = require('../../configs/global_config');
 
 const registerUser = async (req) => {
   const [row] = await conn.execute(
@@ -50,7 +51,7 @@ const loginUser = async (req) => {
     return wrapper.error({}, 'Incorrect Password', 401);
   }
 
-  const generateToken = jwt.sign({id:row[0].id},'the-super-strong-secrect',{ expiresIn: '1h' });
+  const generateToken = jwt.sign({ id: row[0].id }, config.get('/jwtKey'), { expiresIn: '1h' });
   const resModel = {
     email: req.email,
     token: generateToken

@@ -1,4 +1,3 @@
-const bcrypt = require('bcryptjs');
 const conn = require('../../helpers/database/connection').promise();
 const wrapper = require('../../helpers/utils/wrapper');
 const common = require('../../helpers/utils/common');
