@@ -1,14 +1,16 @@
 
 const jwt = require('jsonwebtoken');
-const wrapper = require('./wrapper');
 
-const getDataFromToken = (authorization) => {
+const getDataFromToken = (req, res, authorization) => {
   if(
     !authorization ||
     !authorization.startsWith('Bearer') ||
     !authorization.split(' ')[1]
   ){
-    return wrapper.data({}, 'Invalid Token', 201);
+    res.json({
+      status: 401,
+      message: 'Invalid Token'
+    });
   }
 
   const token = authorization.split(' ')[1];
@@ -16,7 +18,10 @@ const getDataFromToken = (authorization) => {
     const decoded = jwt.verify(token, 'the-super-strong-secrect');
     return decoded;
   } catch (error) {
-    return wrapper.data({}, 'Invalid Token', 201);    
+    res.json({
+      status: 401,
+      message: 'Invalid Token'
+    });
   }
 };
 

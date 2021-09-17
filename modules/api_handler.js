@@ -57,14 +57,13 @@ const loginUser = async (req, res) => {
 
 const createChat = async (req, res) => {
   const { body, headers } = req;
-  const users = common.getDataFromToken(headers.authorization);
+  const users = common.getDataFromToken(req, res, headers.authorization);
 
   const payload = {
     ...body,
     ...headers,
     users
   };
-  console.log(payload)
 
   const validatePayload = validator.isValidPayload(body, chatPayloadModel.createChatValidate);
 
@@ -83,8 +82,27 @@ const createChat = async (req, res) => {
   sendResponse(await postRequest(validatePayload));
 };
 
+const getAllChat = async (req, res) => {
+  const { query, headers } = req;
+  const users = common.getDataFromToken(req, res, headers.authorization);
+
+  const payload = {
+    ...query,
+    ...headers,
+    users
+  };
+
+  const getData = async () => chatDomain.getAllChat(payload);
+  const sendResponse = async (result, data) => {
+    (result.err) ? wrapper.paginationResponse(res, 'fail', result)
+      : wrapper.paginationResponse(res, 'success', result, result.message, data);
+  };
+  sendResponse(await getData());
+};
+
 module.exports = {
   registerUser,
   loginUser,
-  createChat
+  createChat,
+  getAllChat
 };

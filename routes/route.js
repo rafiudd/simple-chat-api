@@ -12,6 +12,6 @@ router.post('/users/register', apiHandlers.registerUser);
 router.post('/users/login', apiHandlers.loginUser);
 
 router.post('/chats/new', apiHandlers.createChat);
-
+router.get('/chats/me', apiHandlers.getAllChat);
 
 module.exports = router;
