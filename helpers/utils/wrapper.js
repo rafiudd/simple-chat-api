@@ -3,7 +3,7 @@ const data = (data, description = '', code = 200) => ({ err: null, message: desc
 
 const paginationData = (data, meta, description = '', code = 200) => ({ err: null, message: description, data, meta, code });
 
-const error = (err, description, code = 500) => ({ err, code, data: '', message: description });
+const error = (err, description, code = 500, data) => ({ err, code, data: {}, message: description });
 
 const response = (res, type, result, message, code, link) => {
   if (message) {

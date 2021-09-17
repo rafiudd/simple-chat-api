@@ -6,29 +6,53 @@ const common = require('../../helpers/utils/common');
 const createChat = async (req) => {
   const { userIdReceiver, users, message } = req;
   const roomId = common.generateRoomId();
+  const messageId = common.generateMessageId();
   const date = new Date().toISOString();
 
-  const [rows] = await conn.execute(
-    'INSERT INTO `chats` (`room_id`, `user_id_receiver`, `message`, `created_by`, `created_at`, `updated_at`) VALUES(?,?,?,?,?,?)', 
+  const [validateRooms] = await conn.execute(
+    'SELECT * FROM `rooms` WHERE `created_by` = ? OR `user_id_receiver` = ?',
+    [users.id, userIdReceiver]
+  );
+
+  if (validateRooms.length > 0) {
+    return wrapper.error(true, 'Cannot create new chat, You already in room. Please use API Reply Chat', 500);
+  }
+
+  const [createRooms] = await conn.execute(
+    'INSERT INTO `rooms` (`room_id`, `user_id_receiver`, `created_by`, `created_at`) VALUES(?,?,?,?)', 
     [
       roomId,
       userIdReceiver,
-      message,
       users.id,
-      date,
       date
     ]
   );
+
+  const [createFirstMessage] = await conn.execute(
+    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`) VALUES(?,?,?,?)', 
+    [
+      roomId,
+      messageId,
+      message,
+      date,
+    ]
+  );
+
+  if(createRooms.affectedRows !== 1 && createFirstMessage.affectedRows !== 1) {
+    return wrapper.error(true, 'Internal Server Error', 500);
+  }
   
-  if (rows.affectedRows === 1) {
+  if (createRooms.affectedRows === 1 && createFirstMessage.affectedRows === 1) {
     const resModel = {
       roomId: roomId,
       userIdReceiver: userIdReceiver,
       createdBy: users.id,
       message: message,
+      messageId,
       createdAt: date,
       updatedAt: date
-    }
+    };
+
     return wrapper.data(resModel, 'Success Create New Chat', 200);
   }
 };
@@ -37,7 +61,7 @@ const getAllChat = async (req) => {
   const { users, page, size } = req;
   const resData = [];
   const [rows] = await conn.execute(
-    'SELECT * FROM `chats` WHERE `created_by`=? ORDER BY created_at = ASC',
+    'SELECT * FROM `rooms` WHERE `created_by`=? ORDER BY created_at = ASC',
     [users.id]
   );
 
