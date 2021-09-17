@@ -72,9 +72,9 @@ const createChat = async (req) => {
 const getAllChat = async (req) => {
   const { users } = req;
   const resData = [];
-  const [rows] = await conn.execute(
-    'SELECT rooms.user_id_receiver, rooms.created_by, rooms.room_id, rooms.created_at, rooms.updated_at, users.username FROM rooms INNER JOIN users ON rooms.user_id_receiver = users.id WHERE rooms.created_by = ? ORDER BY rooms.updated_at DESC',
-    [users.id]
+  let [rows] = await conn.execute(
+    'SELECT rooms.user_id_receiver, rooms.created_by, rooms.room_id, rooms.created_at, rooms.updated_at, users.username FROM rooms INNER JOIN users ON rooms.user_id_receiver = users.id WHERE rooms.created_by = ? OR rooms.user_id_receiver = ? ORDER BY rooms.updated_at DESC',
+    [users.id, users.id]
   );
 
   if (rows.length === 0) {
