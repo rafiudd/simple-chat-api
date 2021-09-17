@@ -61,32 +61,11 @@ const loginUser = async (req) => {
 };
 
 const getAllUser = async (req) => {
-  let { search, page, size } = req;
-  const pages = (page) ? parseInt(page) : 1;
-  const sizes = (size) ? parseInt(size) : 10;
-  const offset = sizes * (pages - 1);
-  const resData = [];
-
-  let query = 'SELECT * FROM users LIMIT ? OFFSET ?';
-  let queryValue = [sizes, offset];
-  let queryCount = 'SELECT COUNT (*) as count FROM users';
-  let queryCountValue = []
-
-  if(search) {
-    query = 'SELECT * FROM users WHERE email LIKE ? LIMIT ? OFFSET ?';
-    queryValue = [search, sizes, offset];
-    queryCount = 'SELECT COUNT (*) as count FROM users WHERE email LIKE ?';
-    queryCountValue = [search]
-  }
-
-  let [countData] = await conn.execute(
-    queryCount,
-    queryCountValue
-  );
+  let resData = [];
+  let query = `SELECT * FROM users`;
 
   let [rows] = await conn.execute(
-    query,
-    queryValue
+    query
   );
 
   if(rows.length < 1) {
@@ -105,14 +84,7 @@ const getAllUser = async (req) => {
     resData.push(resModel);
   });
 
-  const metaData = {
-    page: parseInt(pages),
-    size: parseInt(sizes),
-    totalData: parseInt(countData[0].count),
-    totalPage: Math.ceil(parseInt(countData[0].count) / parseInt(sizes))
-  };
-
-  return wrapper.paginationData(resData, metaData, 'success get all customer account v2', 200);
+  return wrapper.data(resData, 'Success Get All User', 200);
 };
   
 module.exports = {
