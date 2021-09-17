@@ -13,5 +13,6 @@ router.post('/users/login', apiHandlers.loginUser);
 
 router.post('/chats/new', apiHandlers.createChat);
 router.get('/chats/me', apiHandlers.getAllChat);
+router.post('/chats/reply', apiHandlers.replyChat);
 
 module.exports = router;
