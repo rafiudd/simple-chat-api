@@ -10,7 +10,7 @@ const createChat = async (req) => {
   const date = new Date().toISOString();
 
   const [validateRooms] = await conn.execute(
-    'SELECT * FROM `rooms` WHERE `created_by` = ? OR `user_id_receiver` = ?',
+    'SELECT * FROM `rooms` WHERE `created_by` = ? AND `user_id_receiver` = ?',
     [users.id, userIdReceiver]
   );
 
@@ -29,12 +29,13 @@ const createChat = async (req) => {
   );
 
   const [createFirstMessage] = await conn.execute(
-    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`) VALUES(?,?,?,?)', 
+    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`, `created_by`) VALUES(?,?,?,?,?)', 
     [
       roomId,
       messageId,
       message,
       date,
+      users.id
     ]
   );
 
@@ -93,7 +94,33 @@ const getAllChat = async (req) => {
   return wrapper.paginationData(resData, metaData, 'Success Get All Chat', 200);
 };
 
+const replyChat = async (req) => {
+  const { users, roomId, message } = req;
+  const messageId = common.generateMessageId();
+  const date = new Date().toISOString();
+  
+  const [validateRooms] = await conn.execute(
+    'SELECT * FROM `rooms` WHERE `room_id` = ?',
+    [roomId]
+  );
+
+  if (validateRooms.length < 1) {
+    return wrapper.error(true, 'Cannot reply chat, Wrong Room Id', 500);
+  }
+
+  const [createMessage] = await conn.execute(
+    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`) VALUES(?,?,?,?)', 
+    [
+      roomId,
+      messageId,
+      message,
+      date,
+    ]
+  );
+};
+
 module.exports = {
   createChat,
-  getAllChat
+  getAllChat,
+  replyChat
 };
