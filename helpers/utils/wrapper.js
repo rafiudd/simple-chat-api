@@ -3,7 +3,7 @@ const data = (data, description = '', code = 200) => ({ err: null, message: desc
 
 const paginationData = (data, meta, description = '', code = 200) => ({ err: null, message: description, data, meta, code });
 
-const error = (err, description, code = 500, data) => ({ err, code, data: {}, message: description });
+const error = (err, description, code = 500) => ({ err, code, data: {}, message: description });
 
 const response = (res, type, result, message, code, link) => {
   if (message) {
@@ -36,8 +36,7 @@ const response = (res, type, result, message, code, link) => {
     resultObject.link = link;
   }
 
-
-  res.send(result.code,resultObject);
+  res.status(result.code).body(resultObject);
 };
 
 const paginationResponse = (res, type, result, message = null, code = null) => {
@@ -60,15 +59,13 @@ const paginationResponse = (res, type, result, message = null, code = null) => {
     break;
   }
 
-  res.send(result.code,
-    {
-      success: status,
-      data: result.data,
-      meta: result.meta,
-      code: result.code,
-      message: result.message
-    }
-  );
+  res.status(result.code).send({
+    success: status,
+    data: result.data,
+    meta: result.meta,
+    code: result.code,
+    message: result.message
+  });
 };
 
 module.exports = {
