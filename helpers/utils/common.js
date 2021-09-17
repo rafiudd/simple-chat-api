@@ -27,9 +27,14 @@ const getDataFromToken = (req, res, authorization) => {
 
 const generateRoomId = () => {
   return `ROOM-${new Date().getTime()}`;
-}
+};
+
+const generateMessageId = () => {
+  return `MSG-${new Date().getTime()}`;
+};
 
 module.exports = {
   getDataFromToken,
-  generateRoomId
+  generateRoomId,
+  generateMessageId
 };
