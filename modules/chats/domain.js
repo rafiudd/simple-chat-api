@@ -18,6 +18,15 @@ const createChat = async (req) => {
     return wrapper.error(true, 'Cannot create new chat, You already in room. Please use API Reply Chat', 500);
   }
 
+  const [validateReceiver] = await conn.execute(
+    'SELECT * FROM users WHERE `id` = ?',
+    [userIdReceiver]
+  );
+
+  if(validateReceiver.length < 1) {
+    return wrapper.error(true, 'User Id Receiver not found', 500);
+  }
+
   const [createRooms] = await conn.execute(
     'INSERT INTO `rooms` (`room_id`, `user_id_receiver`, `created_by`, `created_at`, `updated_at`) VALUES(?,?,?,?,?)', 
     [
