@@ -29,13 +29,14 @@ const createChat = async (req) => {
   );
 
   const [createFirstMessage] = await conn.execute(
-    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`, `created_by`) VALUES(?,?,?,?,?)', 
+    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`, `created_by`, `is_read`) VALUES(?,?,?,?,?,?)', 
     [
       roomId,
       messageId,
       message,
       date,
-      users.id
+      users.id,
+      'false'
     ]
   );
 
@@ -76,12 +77,19 @@ const getAllChat = async (req) => {
         'SELECT message FROM messages WHERE room_id = ? ORDER BY created_at DESC',
         [value.room_id]
       );
+
+      const [countUnread] = await conn.execute(
+        'SELECT COUNT(is_read) as countUnread FROM messages WHERE room_id = ? AND is_read = ?',
+        [value.room_id, 'false']
+      )
+
       const resModel = {
         roomId: value.room_id,
         userIdReceiver: value.user_id_receiver,
         userNameReceiver: value.username,
         createdBy: value.created_by,
         lastMessage: getLastMessage[0] ? getLastMessage[0].message : "",
+        countUnread: countUnread[0].countUnread,
         lastUpdate: value.updated_at
       };
       resData.push(resModel);
@@ -140,10 +148,16 @@ const replyChat = async (req) => {
 const getDetailChat = async (req) => {
   const { roomId } = req;
   const resData = [];
-  let [rows] = await conn.execute(
+  const [rows] = await conn.execute(
     'SELECT * FROM messages WHERE room_id = ? ORDER BY created_at DESC',
     [roomId]
-  )
+  );
+
+  // jika membuka get detail update semua is_read di room_id yang sama ke true
+  await conn.execute(
+    'UPDATE `messages` SET is_read = ? WHERE room_id = ?',
+    ['true', roomId]
+  );
 
   if (rows.length < 1) {
     return wrapper.data({}, 'Chat Not Found', 201);
@@ -156,9 +170,10 @@ const getDetailChat = async (req) => {
       messageId: value.message_id,
       createdBy: value.created_by,
       createdAt: value.created_at
-    }
-    resData.push(resModel)
-  })
+    };
+    resData.push(resModel);
+  });
+
   return wrapper.data(resData, 'Success Get Detail Chat', 200);
 };
 
