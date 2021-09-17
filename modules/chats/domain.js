@@ -10,7 +10,7 @@ const createChat = async (req) => {
   const date = new Date().toISOString();
 
   const [validateRooms] = await conn.execute(
-    'SELECT * FROM `rooms` WHERE `created_by` = ? OR `user_id_receiver` = ?',
+    'SELECT * FROM `rooms` WHERE `created_by` = ? AND `user_id_receiver` = ?',
     [users.id, userIdReceiver]
   );
 
@@ -29,12 +29,13 @@ const createChat = async (req) => {
   );
 
   const [createFirstMessage] = await conn.execute(
-    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`) VALUES(?,?,?,?)', 
+    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`, `created_by`) VALUES(?,?,?,?,?)', 
     [
       roomId,
       messageId,
       message,
       date,
+      users.id
     ]
   );
 
@@ -93,7 +94,54 @@ const getAllChat = async (req) => {
   return wrapper.paginationData(resData, metaData, 'Success Get All Chat', 200);
 };
 
+const replyChat = async (req) => {
+  const { users, roomId, message } = req;
+  const messageId = common.generateMessageId();
+  const date = new Date().toISOString();
+  
+  const [validateRooms] = await conn.execute(
+    'SELECT * FROM `rooms` WHERE `room_id` = ? AND (user_id_receiver = ? OR created_by = ?)',
+    [roomId, users.id, users.id]
+  );
+
+  if (validateRooms.length < 1) {
+    return wrapper.error(true, 'Cannot reply chat, Not allowed to access this Room Id', 500);
+  }
+
+  const [createMessage] = await conn.execute(
+    'INSERT INTO `messages` (`room_id`, `message_id`, `message`, `created_at`, `created_by`) VALUES(?,?,?,?,?)', 
+    [
+      roomId,
+      messageId,
+      message,
+      date,
+      users.id
+    ]
+  );
+
+  const [updateLastUpdated] = await conn.execute(
+    'UPDATE `rooms` SET updated_at = ? WHERE room_id = ?',
+    [date, roomId]
+  );
+
+  if(createMessage.affectedRows !== 1 && updateLastUpdated.affectedRows !== 1) {
+    return wrapper.error(true, 'Internal Server Error', 500);
+  }
+
+  if(createMessage.affectedRows === 1 && updateLastUpdated.affectedRows === 1) {
+    const resModel = {
+      roomId: roomId,
+      message: message,
+      messageId: messageId,
+      createdBy: users.id,
+      createdAt: date
+    }
+    return wrapper.data(resModel, 'Success Reply Chat', 200);
+  }
+};
+
 module.exports = {
   createChat,
-  getAllChat
+  getAllChat,
+  replyChat
 };
