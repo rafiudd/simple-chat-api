@@ -1,5 +1,6 @@
 
 const jwt = require('jsonwebtoken');
+const config = require('../../configs/global_config');
 
 const getDataFromToken = (req, res, authorization) => {
   if(
@@ -15,7 +16,7 @@ const getDataFromToken = (req, res, authorization) => {
 
   const token = authorization.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, 'the-super-strong-secrect');
+    const decoded = jwt.verify(token, config.get('/jwtKey'));
     return decoded;
   } catch (error) {
     res.json({
