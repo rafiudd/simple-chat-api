@@ -60,7 +60,7 @@ const createChat = async (req) => {
 };
 
 const getAllChat = async (req) => {
-  const { users, page, size } = req;
+  const { users } = req;
   const resData = [];
   const [rows] = await conn.execute(
     'SELECT rooms.user_id_receiver, rooms.created_by, rooms.room_id, rooms.created_at, rooms.updated_at, users.username FROM rooms INNER JOIN users ON rooms.user_id_receiver = users.id WHERE rooms.created_by = ? ORDER BY rooms.updated_at',
@@ -70,8 +70,6 @@ const getAllChat = async (req) => {
   if (rows.length === 0) {
     return wrapper.data({}, 'Chat Not Found', 201);
   }
-
-  
 
   await Promise.all(
     rows.map(async (value) => {
