@@ -1,6 +1,6 @@
 # Simple Chat API
-<h1 align="center">Design Schema</h1>
-![Screenshot](https://res.cloudinary.com/sarjanalidi/image/upload/v1631931211/Database_Schema_1_j0zofm.png)
+<h2 align="center">Design Schema</h2>
+![Screenshot Design Schema](https://raw.githubusercontent.com/rafiudd/simple-chat-api/master/data/Database_Schema.png)
 
 ## Installation
 1. Clone this repository or download zip
@@ -11,7 +11,7 @@ https://github.com/rafiudd/simple-chat-api
 ```bash
 npm install
 ```
-3. Import this db.sql to your local machine
+3. Import this [chat.sql](https://github.com/rafiudd/simple-chat-api/blob/master/data/chat.sql) to your local machine
 4. Then run the project with 
 ```bash
 node index.js or nodemon
