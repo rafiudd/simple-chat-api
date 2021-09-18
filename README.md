@@ -3,16 +3,27 @@
 
 
 ## Installation
-1. Clone this repository or download zip
+1. Clone this repository
 ```bash
 https://github.com/rafiudd/simple-chat-api
 ```
-2. Install package
+2. Customize [.env](https://github.com/rafiudd/simple-chat-api/blob/master/.env) according to your requirements
+```
+HTTP_PORT=3000
+
+MYSQL_HOST=localhost
+MYSQL_DATABASE=chat
+MYSQL_USER=root
+MYSQL_PASSWORD=
+
+JWT_SECRET=the-super-strong-secrect
+```
+3. Install package
 ```bash
 npm install
 ```
-3. Import this [chat.sql](https://github.com/rafiudd/simple-chat-api/blob/master/data/chat.sql) to your local machine
-4. Then run the project with 
+4. Import this [chat.sql](https://github.com/rafiudd/simple-chat-api/blob/master/data/chat.sql) to your mysql local machine
+5. Then run the project with 
 ```bash
 node index.js or nodemon
 ```
